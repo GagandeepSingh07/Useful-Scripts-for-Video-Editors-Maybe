@@ -1,0 +1,60 @@
+# FOLDER TREE GENERATOR
+
+# Purpose
+
+This script generates a visual directory tree for a user-specified folder.
+It prints the folder structure to the console and simultaneously writes the
+same structure to a text file named "file_tree.txt".
+
+The output format mirrors common tree-style directory listings, making it
+useful for documentation, audits, codebase overviews, or sharing project
+structures.
+
+# How It Works
+
+1. The user is prompted to enter a folder path.
+
+2. The script validates that the provided path exists and is a directory.
+   - If the path is invalid, the script exits with an error message.
+
+3. The script recursively traverses the directory using os.listdir():
+   - Directory contents are sorted alphabetically.
+   - Each file and folder is prefixed with tree connectors:
+         ├── for intermediate items
+         └── for the last item in a directory
+   - Indentation is adjusted to visually represent nesting levels.
+
+4. For each item encountered:
+   - The formatted line is printed to the terminal.
+   - The same line is written to "file_tree.txt" using UTF-8 encoding.
+
+5. If a subdirectory is encountered, the function calls itself recursively
+   with updated indentation to continue building the tree.
+
+6. Permission errors (e.g., restricted folders) are safely ignored so the
+   script can continue processing accessible paths.
+
+# Output
+
+- Console output displaying the directory tree
+- A text file named "file_tree.txt" containing the same tree structure
+
+# Example Output
+
+├── src
+│   ├── main.py
+│   └── utils.py
+└── README.md
+
+# Usage
+
+1. Run the script.
+2. When prompted, enter the full or relative path to a folder.
+3. Review the printed tree in the console.
+4. Open "file_tree.txt" to access the saved directory structure.
+
+Notes
+-----
+- The output file is always overwritten if it already exists.
+- Unicode box-drawing characters are used; ensure your editor supports UTF-8.
+- This script is platform-independent and works on Windows, macOS, and Linux.
