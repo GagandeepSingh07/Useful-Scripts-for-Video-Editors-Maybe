@@ -10,6 +10,12 @@ The output format mirrors common tree-style directory listings, making it
 useful for documentation, audits, codebase overviews, or sharing project
 structures.
 
+Warning:
+- Open File "Tree Generator Directory" in your favorite code editor.
+- This script may take a long time to process very large directories.
+- The output file is always overwritten if it already exists.
+- Unicode box-drawing characters are used; ensure your editor supports UTF-8.
+
 # How It Works
 
 1. The user is prompted to enter a folder path.
