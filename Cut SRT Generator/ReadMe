@@ -1,0 +1,37 @@
+# Cut SRT Generator
+
+## Overview
+
+The **Cut SRT Generator** is a Python utility that converts simple, human-readable
+time range instructions into an SRT subtitle file containing **CUT markers**.
+This is useful for video editing workflows where subtitle files are used to
+define cuts, markers, or edit points in an NLE (e.g., Premiere Pro, Resolve).
+
+The script supports frame-accurate timing and optional automatic insertion
+of an initial cut at the start of the timeline.
+
+---
+
+## Features
+
+- Parses intuitive time ranges such as `:24 to :45` or `1:04 to 1:22`
+- Outputs a valid `.srt` subtitle file with `CUT` entries
+- Frame-accurate timing using configurable FPS (default: 29.97)
+- Optional automatic initial cut at `00:00:00`
+- No external dependencies (standard library only)
+
+---
+
+## Requirements
+
+- Python 3.8 or newer
+- No third-party packages required
+
+---
+
+## Usage
+
+### 1. Run the Script
+
+```bash
+python cutgen.py
