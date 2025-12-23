@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 # ---------------- CONFIG ----------------
-OUTPUT_FILE = "cuts.srt"
+OUTPUT_FILE = Path.home() / "Desktop" / "cuts.srt"
 
 INCLUDE_INITIAL_CUT = True   # creates 00:00:00,000 --> 00:00:01,000
 INITIAL_CUT_DURATION = 1.0  # seconds
