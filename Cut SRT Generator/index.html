@@ -1,329 +1,774 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SRT Cut Generator</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SRT Cut Generator – Frame-Accurate SRT Cuts</title>
+    <meta
+      name="description"
+      content="Free online SRT Cut Generator. Convert time ranges into frame-accurate SRT cut markers. Fast, browser-based, no upload."
+    />
+    <link rel="canonical" href="https://example.com/Cut%20SRT%20Generator/" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-<style>
-:root {
-    --bg: #f6f7f9;
-    --card: #ffffff;
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --text: #111827;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --radius: 12px;
-}
+      :root {
+        --bg-primary: #0a0a0f;
+        --bg-secondary: #15151f;
+        --bg-tertiary: #1e1e2e;
+        --accent: #6366f1;
+        --accent-hover: #4f46e5;
+        --accent-glow: rgba(99, 102, 241, 0.3);
+        --text-primary: #ffffff;
+        --text-secondary: #a1a1b5;
+        --text-muted: #6b6b7f;
+        --border: rgba(255, 255, 255, 0.08);
+        --success: #10b981;
+        --radius-sm: 12px;
+        --radius-lg: 20px;
+      }
 
-* {
-    box-sizing: border-box;
-}
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-body {
-    margin: 0;
-    background: var(--bg);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: var(--text);
-    margin-top: 5rem;
-}
+      body {
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
 
-.app {
-    max-width: 1200px;
-    margin: auto;
-    padding: 24px;
-}
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+      }
 
-.header {
-    margin-bottom: 24px;
-}
+      /* Animated gradient background with noise */
+      .bg-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
 
-.header h1 {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 600;
-}
+      .bg-gradient::before {
+        content: "";
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        width: 300%;
+        height: 300%;
+        background: radial-gradient(
+            ellipse at 15% 40%,
+            rgba(99, 102, 241, 0.35) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 85% 15%,
+            rgba(139, 92, 246, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 35% 85%,
+            rgba(236, 72, 153, 0.25) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 90% 70%,
+            rgba(59, 130, 246, 0.28) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 50% 50%,
+            rgba(124, 58, 237, 0.2) 0%,
+            transparent 60%
+          );
+        animation: gradientFloat 20s ease-in-out infinite;
+      }
 
-.header p {
-    margin-top: 6px;
-    color: var(--muted);
-    font-size: 0.95rem;
-}
+      .bg-gradient::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        opacity: 0.5;
+        mix-blend-mode: overlay;
+      }
 
-/* ---------- Layout ---------- */
+      @keyframes gradientFloat {
+        0%,
+        100% {
+          transform: translate(0%, 0%) rotate(0deg) scale(1);
+        }
+        25% {
+          transform: translate(8%, -8%) rotate(90deg) scale(1.15);
+        }
+        50% {
+          transform: translate(-5%, 10%) rotate(180deg) scale(1.05);
+        }
+        75% {
+          transform: translate(-10%, -5%) rotate(270deg) scale(1.1);
+        }
+      }
 
-.layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-}
+      .content-wrapper {
+        position: relative;
+        z-index: 1;
+      }
 
-@media (min-width: 900px) {
-    .layout {
-        grid-template-columns: 1fr 1fr;
-        align-items: stretch;
-    }
-}
+      /* Hero Section */
+      .hero {
+        text-align: center;
+        margin-bottom: 80px;
+        padding: 60px 20px;
+      }
 
-@media (max-width: 900px) {
-    body {
-    margin-top: 2rem;
-    }
-}
+      .hero h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #fff 0%, #a1a1b5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+      }
 
-@media (max-width: 600px) {
-    body {
-    margin-top: 0;
-    }
-}
+      .hero-subtitle {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: var(--text-secondary);
+        max-width: 700px;
+        margin: 0 auto 40px;
+        line-height: 1.7;
+      }
 
-/* ---------- Cards ---------- */
+      .features {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        flex-wrap: wrap;
+      }
 
-.card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      .feature-tag {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+      }
 
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
+      .feature-tag:hover {
+        border-color: var(--accent);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+      }
 
-.form-group {
-    margin-bottom: 18px;
-}
+      .feature-icon {
+        width: 16px;
+        height: 16px;
+        background: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+      }
 
-label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
+      /* Tool Section */
+      .tool {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 80px;
+      }
 
-.helper {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-top: 6px;
-}
+      @media (min-width: 1024px) {
+        .tool {
+          grid-template-columns: 1fr 1fr;
+          gap: 32px;
+        }
+      }
 
-textarea {
-    width: 100%;
-    min-height: 140px;
-    resize: vertical;
-    padding: 12px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.85rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-}
+      .card {
+        background: rgba(21, 21, 31, 0.6);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05),
+          0 0 0 1px rgba(255, 255, 255, 0.02);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+      }
 
-select,
-input[type="number"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 0.85rem;
-}
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(99, 102, 241, 0.1),
+          transparent
+        );
+        transition: left 0.6s ease;
+      }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-}
+      .card:hover::before {
+        left: 100%;
+      }
 
-.checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    margin-bottom: 20px;
-}
+      .card:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 20px 70px rgba(99, 102, 241, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 0 0 1px rgba(99, 102, 241, 0.3);
+        transform: translateY(-2px);
+      }
 
-.checkbox input {
-    width: 16px;
-    height: 16px;
-}
+      /* Form Elements */
+      .form-group {
+        margin-bottom: 24px;
+      }
 
-button {
-    margin-top: auto;
-    padding: 14px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-}
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+      }
 
-button:hover {
-    background: var(--primary-hover);
-}
+      .helper {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
 
-/* ---------- Preview ---------- */
+      .helper code {
+        background: var(--bg-tertiary);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: "SF Mono", monospace;
+      }
 
-.preview-header {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-}
+      textarea {
+        width: 100%;
+        min-height: 160px;
+        resize: vertical;
+        padding: 16px;
+        font-family: "SF Mono", ui-monospace, monospace;
+        font-size: 0.9rem;
+        background: rgba(30, 30, 46, 0.6);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
 
-.preview {
-    background: linear-gradient(180deg, #0f172a, #020617);
-    color: #e5e7eb;
-    padding: 16px;
-    border-radius: 12px;
-    font-family: ui-monospace, monospace;
-    font-size: 0.75rem;
-    white-space: pre;
+      textarea:focus,
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: rgba(30, 30, 46, 0.8);
+        box-shadow: 0 0 0 4px var(--accent-glow),
+          inset 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
 
-    flex: 1;
-    overflow-y: auto;
-}
-</style>
-</head>
+      textarea::placeholder {
+        color: var(--text-muted);
+      }
 
-<body>
-<div class="app">
+      select,
+      input[type="number"] {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(30, 30, 46, 0.6);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
 
-    <div class="header">
-        <h1>SRT Cut Generator</h1>
-        <p>Convert time ranges into frame-accurate SRT cut markers</p>
-    </div>
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
 
-    <div class="layout">
+      .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        padding: 16px;
+        background: rgba(30, 30, 46, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
 
-        <!-- LEFT PANEL -->
-        <div class="card">
+      .checkbox-wrapper:hover {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.3);
+      }
 
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: var(--accent);
+      }
+
+      .checkbox-wrapper label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+      }
+
+      .btn-primary {
+        margin-top: auto;
+        padding: 16px 32px;
+        font-size: 1rem;
+        font-weight: 600;
+        background: linear-gradient(
+          135deg,
+          var(--accent) 0%,
+          rgba(139, 92, 246, 0.9) 100%
+        );
+        color: var(--text-primary);
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px var(--accent-glow),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+
+      .btn-primary:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(
+          135deg,
+          var(--accent-hover) 0%,
+          rgba(124, 58, 237, 0.9) 100%
+        );
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px var(--accent-glow),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      /* Preview */
+      .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .preview-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .preview {
+        background: rgba(2, 6, 23, 0.6);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: var(--text-secondary);
+        padding: 20px;
+        border-radius: var(--radius-sm);
+        font-family: "SF Mono", ui-monospace, monospace;
+        font-size: 0.85rem;
+        white-space: pre;
+        flex: 1;
+        overflow-y: auto;
+        line-height: 1.6;
+        max-height: 500px;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      .preview::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .preview::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+      }
+
+      .preview::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 4px;
+      }
+
+      /* Info Sections */
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 80px;
+      }
+
+      .info-card {
+        background: rgba(21, 21, 31, 0.5);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .info-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--accent),
+          rgba(139, 92, 246, 0.8)
+        );
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+      }
+
+      .info-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .info-card:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+        background: rgba(21, 21, 31, 0.7);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 48px rgba(99, 102, 241, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .info-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+      }
+
+      .info-card p,
+      .info-card ul {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      .info-card ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .info-card li {
+        padding: 8px 0;
+        padding-left: 24px;
+        position: relative;
+      }
+
+      .info-card li::before {
+        content: "→";
+        position: absolute;
+        left: 0;
+        color: var(--accent);
+        font-weight: bold;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 40px 20px;
+        border-top: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+      <div class="content-wrapper">
+        <!-- Hero -->
+        <section class="hero">
+          <h1>SRT Cut Generator</h1>
+          <p class="hero-subtitle">
+            Generate frame-accurate SRT cut markers from human-readable time
+            ranges. Designed for video editing and post-production workflows.
+          </p>
+          <div class="features">
+            <div class="feature-tag">
+              <div class="feature-icon">✓</div>
+              Runs in browser
+            </div>
+            <div class="feature-tag">
+              <div class="feature-icon">✓</div>
+              No upload required
+            </div>
+            <div class="feature-tag">
+              <div class="feature-icon">✓</div>
+              All frame rates
+            </div>
+          </div>
+        </section>
+
+        <!-- Tool -->
+        <section class="tool">
+          <!-- Input -->
+          <div class="card">
             <div class="form-group">
-                <label>Cut instructions</label>
-                <textarea id="inputText" placeholder="Eg. :24 to 1:04, 10:12 to 12:30"></textarea>
-                <div class="helper">
-                    Format: <code>:SS</code> or <code>MM:SS</code> → <code>to</code> → <code>MM:SS</code>
-                </div>
+              <label for="inputText">Cut time ranges</label>
+              <textarea
+                id="inputText"
+                placeholder="Example:
+:24 to 1:04
+10:12 to 12:30"
+              ></textarea>
+              <div class="helper">
+                Format: <code>:SS</code> or <code>MM:SS</code> →
+                <code>to</code> → <code>MM:SS</code>
+              </div>
             </div>
 
             <div class="grid">
-                <div class="form-group">
-                    <label>Frames per second</label>
-                    <select id="fps">
-                        <option value="23.976">23.976</option>
-                        <option value="24">24</option>
-                        <option value="25">25</option>
-                        <option value="29.97" selected>29.97</option>
-                        <option value="30">30</option>
-                        <option value="50">50</option>
-                        <option value="59.94">59.94</option>
-                        <option value="60">60</option>
-                    </select>
-                </div>
+              <div class="form-group">
+                <label for="fps">Frames per second</label>
+                <select id="fps">
+                  <option value="23.976">23.976</option>
+                  <option value="24">24</option>
+                  <option value="25">25</option>
+                  <option value="29.97" selected>29.97</option>
+                  <option value="30">30</option>
+                  <option value="50">50</option>
+                  <option value="59.94">59.94</option>
+                  <option value="60">60</option>
+                </select>
+              </div>
 
-                <div class="form-group">
-                    <label>Initial cut duration (seconds)</label>
-                    <input type="number" id="initialDuration" value="1.0" step="0.1">
-                </div>
+              <div class="form-group">
+                <label for="initialDuration">Initial Cut Duration (sec)</label>
+                <input
+                  type="number"
+                  id="initialDuration"
+                  value="1.0"
+                  step="0.1"
+                />
+              </div>
             </div>
 
-            <div class="checkbox">
-                <input type="checkbox" id="initialCut" checked>
-                <label for="initialCut">Include initial cut at timeline start</label>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="initialCut" checked />
+              <label for="initialCut">Include initial cut at start</label>
             </div>
 
-            <button onclick="generateSRT()">Generate & Download SRT</button>
-        </div>
+            <button class="btn-primary" onclick="generateSRT()">
+              Generate SRT
+            </button>
+          </div>
 
-        <!-- RIGHT PANEL -->
-        <div class="card">
-            <div class="preview-header">Generated SRT Preview</div>
-            <div class="preview" id="preview"></div>
-        </div>
+          <!-- Preview -->
+          <div class="card">
+            <div class="preview-header">
+              <div class="preview-title">SRT Preview</div>
+            </div>
+            <div class="preview" id="preview">
+              // Your generated SRT will appear here
+            </div>
+          </div>
+        </section>
 
+        <!-- Info Cards -->
+        <section class="info-grid">
+          <div class="info-card">
+            <h2>How it works</h2>
+            <ul>
+              <li>Enter time ranges in simple text format</li>
+              <li>Select your video's frame rate</li>
+              <li>Timestamps align to valid frames</li>
+              <li>Download compliant SubRip (.srt) file</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h2>Technical details</h2>
+            <p>
+              Time ranges are parsed and normalized to seconds, then converted
+              to frame-aligned timestamps using the selected FPS. Output files
+              follow the standard SubRip specification.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h2>Privacy</h2>
+            <p>
+              All processing is performed locally in your browser. No input data
+              is uploaded, stored, or transmitted. Your content stays private.
+            </p>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+          © 2025 SRT Cut Generator · Browser-based utility
+        </footer>
+      </div>
     </div>
-</div>
 
-<script>
-function parseTime(t) {
-    if (t.startsWith(":")) return parseInt(t.slice(1), 10);
-    const [m, s] = t.split(":").map(Number);
-    return m * 60 + s;
-}
+    <script>
+      function parseTime(t) {
+        if (t.startsWith(":")) return parseInt(t.slice(1), 10);
+        const [m, s] = t.split(":").map(Number);
+        return m * 60 + s;
+      }
 
-function secondsToSrtTime(seconds, fps) {
-    const frame = Math.round(seconds * fps);
-    seconds = frame / fps;
+      function secondsToSrtTime(seconds, fps) {
+        const frame = Math.round(seconds * fps);
+        seconds = frame / fps;
 
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds - Math.floor(seconds)) * 1000);
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        const ms = Math.floor((seconds - Math.floor(seconds)) * 1000);
 
-    return `${String(h).padStart(2,"0")}:` +
-           `${String(m).padStart(2,"0")}:` +
-           `${String(s).padStart(2,"0")},` +
-           `${String(ms).padStart(3,"0")}`;
-}
+        return (
+          `${String(h).padStart(2, "0")}:` +
+          `${String(m).padStart(2, "0")}:` +
+          `${String(s).padStart(2, "0")},` +
+          `${String(ms).padStart(3, "0")}`
+        );
+      }
 
-function extractRanges(text) {
-    const regex = /([0-9:]+)\s*to\s*([0-9:]+)/g;
-    const ranges = [];
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-        ranges.push([parseTime(match[1]), parseTime(match[2])]);
-    }
-    return ranges;
-}
+      function extractRanges(text) {
+        const regex = /([0-9:]+)\s*to\s*([0-9:]+)/g;
+        const ranges = [];
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+          ranges.push([parseTime(match[1]), parseTime(match[2])]);
+        }
+        return ranges;
+      }
 
-function generateSRT() {
-    const text = inputText.value;
-    const fps = parseFloat(document.getElementById("fps").value);
-    const includeInitial = initialCut.checked;
-    const initialDuration = parseFloat(initialDurationInput.value);
+      function generateSRT() {
+        const text = inputText.value;
+        const fps = parseFloat(fpsSelect.value);
+        const includeInitial = initialCut.checked;
+        const initialDuration = parseFloat(initialDurationInput.value);
 
-    const ranges = extractRanges(text);
-    if (!ranges.length) {
-        alert("No valid cut ranges found.");
-        return;
-    }
+        const ranges = extractRanges(text);
+        if (!ranges.length) {
+          alert("No valid time ranges found.");
+          return;
+        }
 
-    let idx = 1;
-    let lines = [];
+        let index = 1;
+        let output = [];
 
-    if (includeInitial) {
-        lines.push(
-            idx++,
-            `${secondsToSrtTime(0, fps)} --> ${secondsToSrtTime(initialDuration, fps)}`,
+        if (includeInitial) {
+          output.push(
+            index++,
+            `${secondsToSrtTime(0, fps)} --> ${secondsToSrtTime(
+              initialDuration,
+              fps
+            )}`,
             "CUT",
             ""
-        );
-    }
+          );
+        }
 
-    for (const [start, end] of ranges) {
-        lines.push(
-            idx++,
+        for (const [start, end] of ranges) {
+          output.push(
+            index++,
             `${secondsToSrtTime(start, fps)} --> ${secondsToSrtTime(end, fps)}`,
             "CUT",
             ""
-        );
-    }
+          );
+        }
 
-    const content = lines.join("\n");
-    preview.textContent = content;
+        const content = output.join("\n");
+        preview.textContent = content;
 
-    const blob = new Blob([content], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "cuts.srt";
-    link.click();
-}
+        const blob = new Blob([content], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "cuts.srt";
+        link.click();
+      }
 
-const inputText = document.getElementById("inputText");
-const initialCut = document.getElementById("initialCut");
-const initialDurationInput = document.getElementById("initialDuration");
-const preview = document.getElementById("preview");
-</script>
-</body>
+      const inputText = document.getElementById("inputText");
+      const fpsSelect = document.getElementById("fps");
+      const initialCut = document.getElementById("initialCut");
+      const initialDurationInput = document.getElementById("initialDuration");
+      const preview = document.getElementById("preview");
+    </script>
+  </body>
 </html>
